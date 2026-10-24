@@ -198,7 +198,7 @@ export function MainProfileModal({
   const touchStartYRef = useRef<number | null>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const publicUrl = "https://ais-pre-ick7smocmch5wsjc23jx6i-178090609278.europe-west2.run.app";
+  const publicUrl = typeof window !== "undefined" ? window.location.origin : "";
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

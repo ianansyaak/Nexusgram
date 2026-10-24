@@ -159,9 +159,8 @@ function saveSessionLocally(sessionStr: string) {
   }
 }
 
-const apiId = parseInt(process.env.TELEGRAM_API_ID || "23516840");
-const apiHash =
-  process.env.TELEGRAM_API_HASH || "a3df06e13c5819d1bd1040f1c73c5379";
+const apiId = parseInt(process.env.TELEGRAM_API_ID || "0");
+const apiHash = process.env.TELEGRAM_API_HASH || "";
 let stringSession = createSafeStringSession(loadInitialSession());
 let telegramClient: TelegramClient | null = null;
 let io: Server | null = null;
@@ -1558,7 +1557,7 @@ ${JSON.stringify(condensed)}`;
   app.get("/api/dev", (req, res) => {
     res.json({
       status: "ok",
-      appUrl: process.env.APP_URL || "https://ais-dev-rx3uoamcrxh4skjy34aqnq-748775905065.europe-west2.run.app",
+      appUrl: process.env.APP_URL || "",
       timestamp: new Date().toISOString(),
       capabilities: ["telegram", "gemini", "search", "reactions", "custom-sections"],
     });
@@ -2387,23 +2386,58 @@ ${JSON.stringify(condensed)}
     }
   });
 
+  const purgeAllSessionAndCachedData = async () => {
+    if (telegramClient) {
+      try {
+        await telegramClient.disconnect();
+      } catch (disErr) {}
+      telegramClient = null;
+    }
+    stringSession = new StringSession("");
+    process.env.TELEGRAM_SESSION = "";
+
+    // Remove local session files
+    const targets = [
+      getSessionFilePath(),
+      path.join(process.cwd(), ".telegram_session"),
+      path.join("/tmp", ".telegram_session"),
+    ];
+    for (const t of targets) {
+      if (fs.existsSync(t)) {
+        try {
+          fs.unlinkSync(t);
+        } catch (_) {}
+      }
+    }
+
+    // Clean uploads directory
+    if (fs.existsSync(uploadDir)) {
+      try {
+        const files = fs.readdirSync(uploadDir);
+        for (const file of files) {
+          if (file !== ".gitkeep") {
+            try {
+              fs.unlinkSync(path.join(uploadDir, file));
+            } catch (_) {}
+          }
+        }
+      } catch (_) {}
+    }
+  };
+
   app.post("/api/telegram/session/clear", async (req, res) => {
     try {
-      if (telegramClient) {
-        try {
-          await telegramClient.disconnect();
-        } catch (disErr) {}
-        telegramClient = null;
-      }
-      stringSession = new StringSession("");
-      process.env.TELEGRAM_SESSION = "";
-      const sFile = getSessionFilePath();
-      if (fs.existsSync(sFile)) {
-        try {
-          fs.unlinkSync(sFile);
-        } catch (uErr) {}
-      }
-      res.json({ success: true });
+      await purgeAllSessionAndCachedData();
+      res.json({ success: true, message: "Все данные сессии и кэш очищены" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/system/purge-all-user-data", async (req, res) => {
+    try {
+      await purgeAllSessionAndCachedData();
+      res.json({ success: true, message: "Все сессии, временные файлы и следы пользователя успешно удалены" });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

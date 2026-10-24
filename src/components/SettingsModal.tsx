@@ -3,7 +3,7 @@ import { getStrings } from "../utils/i18n";
 import { TrafficAnalyticsModal } from "./TrafficAnalyticsModal";
 import { LiquidGlassControls } from "./LiquidGlassControls";
 import { getEcoStats, formatBytes } from "../utils/ecoStream";
-import { resetDesignSettings, resetDynamicIslandSettings, resetAllAppSettings } from "../utils/resetSettings";
+import { resetDesignSettings, resetDynamicIslandSettings, resetAllAppSettings, purgeAllUserDataAndSessions } from "../utils/resetSettings";
 import React, { useState, useEffect, useRef } from "react";
 import { 
   X, 
@@ -1374,7 +1374,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, fps, init
                         onClick={async () => {
                           triggerHaptic("success");
                           try {
-                            await navigator.clipboard.writeText("https://ais-dev-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app");
+                            const dUrl = typeof window !== "undefined" ? window.location.origin.replace("-pre-", "-dev-") : "";
+                            await navigator.clipboard.writeText(dUrl);
                             setCopiedDevLink(true);
                             setTimeout(() => setCopiedDevLink(false), 2000);
                           } catch (_) {}
@@ -1395,9 +1396,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, fps, init
                       </button>
                     </div>
                     <div className="flex items-center justify-between gap-2 text-xs font-mono text-gray-400 bg-black/40 px-2.5 py-1.5 rounded-lg select-all overflow-x-auto">
-                      <span className="text-blue-300 truncate">https://ais-dev-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app</span>
+                      <span className="text-blue-300 truncate">
+                        {typeof window !== "undefined" ? window.location.origin.replace("-pre-", "-dev-") : ""}
+                      </span>
                       <a
-                        href="https://ais-dev-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app"
+                        href={typeof window !== "undefined" ? window.location.origin.replace("-pre-", "-dev-") : "#"}
                         target="_blank"
                         rel="noreferrer"
                         className="text-gray-400 hover:text-white shrink-0"
@@ -1420,7 +1423,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, fps, init
                         onClick={async () => {
                           triggerHaptic("success");
                           try {
-                            await navigator.clipboard.writeText("https://ais-pre-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app");
+                            const sUrl = typeof window !== "undefined" ? window.location.origin.replace("-dev-", "-pre-") : "";
+                            await navigator.clipboard.writeText(sUrl);
                             setCopiedShareLink(true);
                             setTimeout(() => setCopiedShareLink(false), 2000);
                           } catch (_) {}
@@ -1441,9 +1445,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, fps, init
                       </button>
                     </div>
                     <div className="flex items-center justify-between gap-2 text-xs font-mono text-gray-400 bg-black/40 px-2.5 py-1.5 rounded-lg select-all overflow-x-auto">
-                      <span className="text-purple-300 truncate">https://ais-pre-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app</span>
+                      <span className="text-purple-300 truncate">
+                        {typeof window !== "undefined" ? window.location.origin.replace("-dev-", "-pre-") : ""}
+                      </span>
                       <a
-                        href="https://ais-pre-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app"
+                        href={typeof window !== "undefined" ? window.location.origin.replace("-dev-", "-pre-") : "#"}
                         target="_blank"
                         rel="noreferrer"
                         className="text-gray-400 hover:text-white shrink-0"
@@ -1946,23 +1952,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, fps, init
                   </button>
 
                   <button
-                    onClick={() => {
-                      if (window.confirm("Вы уверены, что хотите сбросить ВСЕ настройки оформления и приложения? Ваша авторизация Telegram будет сохранена.")) {
-                        resetAllAppSettings();
-                        setTheme("dark");
-                        setSelectedCover("classic-blue");
-                        setResetFeedback("Все настройки приложения успешно сброшены к исходным!");
-                        setTimeout(() => setResetFeedback(null), 4000);
+                    onClick={async () => {
+                      if (window.confirm("Удалить ВСЕ данные пользователя, сессии Telegram, кэш и настройки для безопасной выгрузки на GitHub? Приложение будет полностью очищено.")) {
+                        setResetFeedback("Удаление всех данных и сессий...");
+                        await purgeAllUserDataAndSessions();
+                        setResetFeedback("Все следы и сессии успешно удалены! Перезагрузка...");
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1200);
                       }
                     }}
-                    className="p-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-left transition-all cursor-pointer group"
+                    className="p-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-left transition-all cursor-pointer group sm:col-span-2 lg:col-span-3"
                   >
-                    <div className="flex items-center gap-2 text-xs font-semibold text-amber-300">
-                      <RotateCcw className="w-4 h-4 text-amber-400" />
-                      Полный сброс
+                    <div className="flex items-center gap-2 text-xs font-semibold text-rose-400">
+                      <Trash2 className="w-4 h-4 text-rose-400" />
+                      Очистить все данные пользователя и сессии (Подготовка к GitHub)
                     </div>
                     <p className="text-[11px] text-gray-400 mt-1">
-                      Возврат всех настроек к заводскому состоянию
+                      Полностью удаляет сессию Telegram, временные медиа, кэш, API-ключи и идентификаторы как на сервере, так и в браузере.
                     </p>
                   </button>
                 </div>

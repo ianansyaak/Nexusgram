@@ -94,3 +94,38 @@ export function resetAllAppSettings() {
     return false;
   }
 }
+
+/**
+ * Deep purge: removes all user data, Telegram sessions, keys, uploads, and cached state
+ * completely wiping all traces for GitHub export and security.
+ */
+export async function purgeAllUserDataAndSessions() {
+  try {
+    // 1. Wipe server-side Telegram session, files in /tmp and uploads cache
+    try {
+      await fetch("/api/system/purge-all-user-data", { method: "POST" });
+    } catch (_) {}
+
+    // 2. Clear all local and session storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 3. Clear IndexedDB if possible
+    try {
+      const dbs = await indexedDB.databases?.();
+      if (dbs) {
+        for (const db of dbs) {
+          if (db.name) indexedDB.deleteDatabase(db.name);
+        }
+      }
+    } catch (_) {}
+
+    // 4. Reset design and theme to defaults
+    applyTheme("dark");
+
+    return true;
+  } catch (e) {
+    console.error("Purge error:", e);
+    return false;
+  }
+}

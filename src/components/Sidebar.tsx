@@ -51,9 +51,9 @@ function ProfileDialog({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const publicUrl = typeof window !== "undefined" && window.location.origin.includes("run.app")
+  const publicUrl = typeof window !== "undefined"
     ? window.location.origin
-    : "https://ais-pre-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app";
+    : "";
 
   useEffect(() => {
     fetch('/api/telegram/me')
@@ -1197,9 +1197,9 @@ export function Sidebar({
 
   const [copiedPublicLink, setCopiedPublicLink] = useState(false);
   const handleCopyPublicLinkHeader = async () => {
-    const activeSharedUrl = typeof window !== "undefined" && window.location.origin.includes("run.app")
+    const activeSharedUrl = typeof window !== "undefined"
       ? window.location.origin
-      : "https://ais-pre-xahmk6ubske67lzjyumw3v-748775905065.europe-west2.run.app";
+      : "";
     try {
       await navigator.clipboard.writeText(activeSharedUrl);
       setCopiedPublicLink(true);

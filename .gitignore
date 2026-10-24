@@ -6,3 +6,16 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Telegram & user session data
+.telegram_session*
+*.session
+*.dat
+uploads/*
+!uploads/.gitkeep
+
+# Local databases and caches
+*.sqlite
+*.db
+.cache/
+temp/
