@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="notesBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#49b6f6"/>
+      <stop offset="100%" stop-color="#1e96e8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="256" fill="url(#notesBg)"/>
+  <!-- Back angled sheet -->
+  <rect x="142" y="148" width="168" height="198" rx="28" fill="#ffffff" opacity="0.92" transform="rotate(-10 226 247)"/>
+  <!-- Front straight sheet -->
+  <rect x="190" y="172" width="176" height="206" rx="30" fill="#ffffff"/>
+  <!-- Note text lines on front sheet -->
+  <rect x="232" y="222" width="92" height="14" rx="7" fill="#38a9f5"/>
+  <rect x="232" y="258" width="92" height="14" rx="7" fill="#38a9f5"/>
+  <rect x="232" y="294" width="60" height="14" rx="7" fill="#38a9f5"/>
+</svg>
